@@ -2,7 +2,7 @@
 
 All notable changes to the Azure Nuke project will be documented in this file.
 
-## [0.1.2] - 2025-05-02
+## [0.1.3] - 2025-05-02
 
 ### Changed
 - Updated README with Cloudinary image hosting
