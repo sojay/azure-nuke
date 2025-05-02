@@ -2,13 +2,13 @@
 
 All notable changes to the Azure Nuke project will be documented in this file.
 
-## [0.1.2] - 2023-10-31
+## [0.1.2] - 2025-05-02
 
 ### Changed
 - Updated README with Cloudinary image hosting
 - Fixed image display in PyPI documentation
 
-## [0.1.1] - 2023-10-31
+## [0.1.1] - 2025-05-01
 
 ### Added
 - Beautiful ASCII art banners for the main application, warnings, and completion screens
@@ -20,7 +20,7 @@ All notable changes to the Azure Nuke project will be documented in this file.
 - Updated the safety confirmation UI to use the new warning banner
 - Improved visual consistency across the application
 
-## [0.1.0] - 2023-10-30
+## [0.1.0] - 2025-05-01
 
 ### Added
 - Initial release
