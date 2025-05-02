@@ -2,6 +2,15 @@
 
 A powerful CLI tool for scanning and cleaning up Azure resources.
 
+## Features
+
+- **Comprehensive scanning** of Azure resources across subscriptions
+- **Safe deletion** with confirmation prompts and dry-run mode
+- **Flexible filtering** by resource type, region, and more
+- **Exclusion system** to protect critical infrastructure
+- **Beautiful ASCII art banners** for a better command-line experience
+- **Color-coded output** for easy identification of actions and results
+
 ## Installation
 
 ```bash
