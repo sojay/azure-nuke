@@ -1,3 +1,5 @@
+![Azure Nuke](https://i.imgur.com/carbon-SNQDyRd.png)
+
 # Azure Nuke
 
 A powerful CLI tool for scanning and cleaning up Azure resources.

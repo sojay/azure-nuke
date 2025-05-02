@@ -28,6 +28,8 @@ PUBLISHING.md
 pypi_publish.sh
 azure_nuke
 aznuke_run.py
+test_animation.py
+landing_image.png
 
 # PyInstaller
 #  Usually these files are written by a python script from a template
