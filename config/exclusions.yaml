@@ -1,0 +1,15 @@
+# config/exclusions.yaml
+resource_types:
+  - Microsoft.KeyVault/vaults  # Exclude all Key Vaults
+  - Microsoft.Storage/storageAccounts  # Exclude all Storage Accounts
+
+name_patterns:
+  - "^prod-.*$"  # Exclude resources with names starting with "prod-"
+  - ".*-do-not-delete$"  # Exclude resources with names ending with "-do-not-delete"
+
+resource_ids:
+  - "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/important-rg/providers/Microsoft.Storage/storageAccounts/criticalaccount"
+
+tags:
+  Environment: "Production"
+  DoNotDelete: "true"
