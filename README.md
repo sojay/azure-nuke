@@ -1,4 +1,4 @@
-![Azure Nuke](https://i.imgur.com/carbon-SNQDyRd.png)
+![Azure Nuke](https://res.cloudinary.com/dl2sohb5d/image/upload/v1746205186/landing_image_tioiup.png)
 
 # Azure Nuke
 

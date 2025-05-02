@@ -2,6 +2,12 @@
 
 All notable changes to the Azure Nuke project will be documented in this file.
 
+## [0.1.2] - 2023-10-31
+
+### Changed
+- Updated README with Cloudinary image hosting
+- Fixed image display in PyPI documentation
+
 ## [0.1.1] - 2023-10-31
 
 ### Added
