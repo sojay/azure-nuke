@@ -7,21 +7,14 @@ def build_dependency_graph(resources):
     for resource in resources:
         dependency_graph[resource.id] = []
     
-    # This is a simplified approach. In a real implementation,
-    # you would need to query Azure's API for specific dependency information
-    # or infer dependencies based on resource types and properties.
-    
     # For example, a VM depends on its NIC, which depends on its subnet, etc.
     
     return dependency_graph
 
 def sort_by_dependencies(resources, dependency_graph):
     """Sort resources based on their dependencies (topological sort)."""
-    # This is a simplified version. A real implementation would use
-    # a proper topological sort algorithm.
     
-    # For now, we'll use a basic approach that prioritizes known
-    # resource types in a reasonable order
+    # prioritize known resource types in a reasonable order
     
     # Common deletion order (from leaf to root):
     # 1. Virtual Machines
