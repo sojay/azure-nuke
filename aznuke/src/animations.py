@@ -12,6 +12,48 @@ from azure.mgmt.resource import SubscriptionClient
 # Initialize colorama for cross-platform colored terminal text
 init(autoreset=True)
 
+# Azure Nuke ASCII art banner
+BANNER = """
+ █████╗ ███████╗██╗   ██╗██████╗ ███████╗    ███╗   ██╗██╗   ██╗██╗  ██╗███████╗
+██╔══██╗╚══███╔╝██║   ██║██╔══██╗██╔════╝    ████╗  ██║██║   ██║██║ ██╔╝██╔════╝
+███████║  ███╔╝ ██║   ██║██████╔╝█████╗      ██╔██╗ ██║██║   ██║█████╔╝ █████╗  
+██╔══██║ ███╔╝  ██║   ██║██╔══██╗██╔══╝      ██║╚██╗██║██║   ██║██╔═██╗ ██╔══╝  
+██║  ██║███████╗╚██████╔╝██║  ██║███████╗    ██║ ╚████║╚██████╔╝██║  ██╗███████╗
+╚═╝  ╚═╝╚══════╝ ╚═════╝ ╚═╝  ╚═╝╚══════╝    ╚═╝  ╚═══╝ ╚═════╝ ╚═╝  ╚═╝╚══════╝
+                                                                        
+                   Cloud Resource Cleanup Tool for Azure
+"""
+
+# Complete success banner
+COMPLETE_BANNER = """
+ ██████╗ ██████╗ ███╗   ███╗██████╗ ██╗     ███████╗████████╗███████╗██╗
+██╔════╝██╔═══██╗████╗ ████║██╔══██╗██║     ██╔════╝╚══██╔══╝██╔════╝██║
+██║     ██║   ██║██╔████╔██║██████╔╝██║     █████╗     ██║   █████╗  ██║
+██║     ██║   ██║██║╚██╔╝██║██╔═══╝ ██║     ██╔══╝     ██║   ██╔══╝  ╚═╝
+╚██████╗╚██████╔╝██║ ╚═╝ ██║██║     ███████╗███████╗   ██║   ███████╗██╗
+ ╚═════╝ ╚═════╝ ╚═╝     ╚═╝╚═╝     ╚══════╝╚══════╝   ╚═╝   ╚══════╝╚═╝
+"""
+
+# Partial completion banner
+PARTIAL_COMPLETE_BANNER = """
+ ██████╗ ██████╗ ███╗   ███╗██████╗ ██╗     ███████╗████████╗███████╗██████╗ 
+██╔════╝██╔═══██╗████╗ ████║██╔══██╗██║     ██╔════╝╚══██╔══╝██╔════╝██╔══██╗
+██║     ██║   ██║██╔████╔██║██████╔╝██║     █████╗     ██║   █████╗  ██║  ██║
+██║     ██║   ██║██║╚██╔╝██║██╔═══╝ ██║     ██╔══╝     ██║   ██╔══╝  ██║  ██║
+╚██████╗╚██████╔╝██║ ╚═╝ ██║██║     ███████╗███████╗   ██║   ███████╗██████╔╝
+ ╚═════╝ ╚═════╝ ╚═╝     ╚═╝╚═╝     ╚══════╝╚══════╝   ╚═╝   ╚══════╝╚═════╝ 
+"""
+
+# Warning banner for deletion confirmation
+WARNING_BANNER = """
+██╗    ██╗ █████╗ ██████╗ ███╗   ██╗██╗███╗   ██╗ ██████╗ ██╗
+██║    ██║██╔══██╗██╔══██╗████╗  ██║██║████╗  ██║██╔════╝ ██║
+██║ █╗ ██║███████║██████╔╝██╔██╗ ██║██║██╔██╗ ██║██║  ███╗██║
+██║███╗██║██╔══██║██╔══██╗██║╚██╗██║██║██║╚██╗██║██║   ██║╚═╝
+╚███╔███╔╝██║  ██║██║  ██║██║ ╚████║██║██║ ╚████║╚██████╔╝██╗
+ ╚══╝╚══╝ ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝  ╚═══╝╚═╝╚═╝  ╚═══╝ ╚═════╝ ╚═╝
+"""
+
 def clear_screen():
     """Clear the terminal screen."""
     os.system('cls' if os.name == 'nt' else 'clear')
@@ -20,12 +62,8 @@ def show_startup_animation():
     """Display the startup animation with Azure Nuke logo."""
     clear_screen()
     
-    # Create Azure Nuke ASCII art
-    fig = Figlet(font='slant')
-    azure_nuke_text = fig.renderText('Azure Nuke')
-    
-    # Print the ASCII art in blue
-    print(Fore.BLUE + azure_nuke_text)
+    # Display the banner
+    print(Fore.BLUE + BANNER + Style.RESET_ALL)
     print(Fore.YELLOW + "[INITIALIZING]" + Style.RESET_ALL + " Azure resource removal tool\n")
     
     # Loading animation
@@ -108,14 +146,10 @@ def show_completion_animation(success, resources_deleted, resources_failed):
     """
     print("\n")
     if success:
-        fig = Figlet(font='slant')
-        complete_text = fig.renderText('Complete!')
-        print(Fore.GREEN + complete_text)
+        print(Fore.GREEN + COMPLETE_BANNER + Style.RESET_ALL)
         print(f"{Fore.GREEN}[SUCCESS]{Style.RESET_ALL} Operation completed successfully!")
     else:
-        fig = Figlet(font='slant')
-        complete_text = fig.renderText('Completed')
-        print(Fore.YELLOW + complete_text)
+        print(Fore.YELLOW + PARTIAL_COMPLETE_BANNER + Style.RESET_ALL)
         print(f"{Fore.YELLOW}[COMPLETE WITH ERRORS]{Style.RESET_ALL} Some operations failed")
     
     print(f"{Fore.CYAN}         Resources processed: {resources_deleted}")
@@ -125,6 +159,14 @@ def show_completion_animation(success, resources_deleted, resources_failed):
         print(f"{Fore.CYAN}         Resources failed: {resources_failed}")
     
     print(f"\n{Fore.YELLOW}[NOTE]{Style.RESET_ALL} Please check logs for details.")
+
+def show_warning_banner():
+    """Display a warning banner for destructive operations."""
+    print("\n")
+    print(Fore.RED + WARNING_BANNER + Style.RESET_ALL)
+    print(f"{Fore.RED}[CAUTION]{Style.RESET_ALL} You are about to delete Azure resources.")
+    print(f"{Fore.RED}[CAUTION]{Style.RESET_ALL} This operation cannot be undone.")
+    print("\n")
 
 if __name__ == "__main__":
     import asyncio
