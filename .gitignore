@@ -24,8 +24,10 @@ wheels/
 .installed.cfg
 *.egg
 MANIFEST
-PUBLISHING
-pypi_publish
+PUBLISHING.md
+pypi_publish.sh
+azure_nuke
+aznuke_run.py
 
 # PyInstaller
 #  Usually these files are written by a python script from a template
