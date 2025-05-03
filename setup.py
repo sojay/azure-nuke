@@ -12,8 +12,8 @@ setup(
     long_description=long_description,
     long_description_content_type="text/markdown",
     author="Samuel Okorie",
-    author_email="thesamokorie@gmail.com",  # Replace with your email
-    url="https://github.com/sojay/azure-nuke",  # Replace with your repository URL
+    author_email="thesamokorie@gmail.com",  
+    url="https://github.com/sojay/azure-nuke", 
     packages=find_packages(include=["aznuke", "aznuke.*", "src", "src.*"]),
     include_package_data=True,
     package_data={
