@@ -1,31 +1,56 @@
 # Changelog
 
-All notable changes to the Azure Nuke project will be documented in this file.
+All notable changes to Azure Nuke will be documented in this file.
 
-## [0.1.3] - 2025-05-02
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-### Changed
-- Updated README with Cloudinary image hosting
-- Fixed image display in PyPI documentation
-
-## [0.1.1] - 2025-05-01
+## [Unreleased]
 
 ### Added
-- Beautiful ASCII art banners for the main application, warnings, and completion screens
-- Added show_warning_banner function to display danger alerts before resource deletion
-- Updated completion screens with custom ASCII art for both successful and partial completions
+- Homebrew support for macOS and Linux
+- Cross-platform binary support (Darwin AMD64/ARM64, Linux AMD64/ARM64, Windows AMD64)
+- GitHub Pages documentation site
+- Comprehensive documentation with MkDocs
+- PyInstaller spec for building standalone executables
+- Automated release workflows
+- Build and release scripts
 
 ### Changed
-- Replaced Figlet-generated text with custom ASCII art banners
-- Updated the safety confirmation UI to use the new warning banner
-- Improved visual consistency across the application
+- Improved installation documentation
+- Updated project structure for better packaging
 
-## [0.1.0] - 2025-05-01
+## [0.1.3] - 2024-01-20
 
 ### Added
-- Initial release
-- Azure resource scanning functionality
-- Resource deletion with safety confirmations
-- Dry run mode for previewing actions
-- Exclusion system via YAML configuration
-- Support for filtering by resource type, region, and subscription 
+- Comprehensive scanning of Azure resources across subscriptions
+- Safe deletion with confirmation prompts and dry-run mode
+- Flexible filtering by resource type, region, and more
+- Exclusion system to protect critical infrastructure
+- Beautiful ASCII art banners for a better command-line experience
+- Color-coded output for easy identification of actions and results
+- Support for multiple Azure resource types (Storage, Compute, Network, KeyVault, Monitor)
+- Asynchronous operations for better performance
+- Detailed logging and error handling
+
+### Fixed
+- Initial release bug fixes and improvements
+
+## [0.1.2] - 2024-01-15
+
+### Added
+- Basic resource discovery functionality
+- Command-line interface with scan and delete commands
+- Configuration file support for exclusions
+
+## [0.1.1] - 2024-01-10
+
+### Added
+- Initial project structure
+- Basic Azure authentication
+
+## [0.1.0] - 2024-01-05
+
+### Added
+- Initial release of Azure Nuke
+- Basic functionality for Azure resource management 

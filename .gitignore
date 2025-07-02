@@ -70,3 +70,17 @@ venv.bak/
 *.swp
 *.swo
 .DS_Store
+
+# MkDocs
+site/
+
+# Homebrew
+homebrew/*.rb.bak
+
+# Build artifacts
+*.tar.gz
+*.whl
+*.exe
+
+# Documentation build
+docs/_build/

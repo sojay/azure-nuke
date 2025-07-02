@@ -281,6 +281,10 @@ Examples:
 """
     )
     
+    # Add version argument
+    from aznuke import __version__
+    parser.add_argument('--version', action='version', version=f'Azure Nuke {__version__}')
+    
     subparsers = parser.add_subparsers(dest="command", help="Command to execute")
     
     # Scan command

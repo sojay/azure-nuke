@@ -1,3 +1,9 @@
-from aznuke.cli import main
+"""Azure Nuke - A powerful CLI tool for scanning and cleaning up Azure resources."""
 
-__version__ = "0.1.0" 
+__version__ = "0.1.3"
+__author__ = "Samuel Okorie"
+__email__ = "thesamokorie@gmail.com"
+
+from .cli import main
+
+__all__ = ["main"] 

@@ -1,0 +1,23 @@
+name: Update Homebrew Formula
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  homebrew:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Update Homebrew formula
+        uses: mislav/bump-homebrew-formula-action@v2
+        with:
+          formula-name: aznuke
+          formula-path: homebrew/aznuke.rb
+          homebrew-tap: sojay/homebrew-tap
+          download-url: https://github.com/sojay/azure-nuke/archive/v${{ github.event.release.tag_name }}.tar.gz
+          commit-message: |
+            {{formulaName}} {{version}}
+            
+            Created by https://github.com/mislav/bump-homebrew-formula-action
+        env:
+          COMMITTER_TOKEN: ${{ secrets.HOMEBREW_TAP_TOKEN }} 

@@ -1,0 +1,65 @@
+[build-system]
+requires = ["setuptools>=45", "wheel", "setuptools_scm[toml]>=6.2"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "aznuke"
+version = "0.1.3"
+description = "Azure resource scanner and cleanup tool"
+readme = "README.md"
+authors = [
+    {name = "Samuel Okorie", email = "thesamokorie@gmail.com"}
+]
+license = {text = "MIT"}
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Intended Audience :: System Administrators",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Topic :: System :: Systems Administration",
+    "Topic :: Utilities",
+]
+keywords = ["azure", "cloud", "cleanup", "infrastructure", "devops"]
+requires-python = ">=3.8"
+dependencies = [
+    "azure-identity>=1.10.0",
+    "azure-mgmt-resource>=22.0.0",
+    "azure-mgmt-subscription>=3.1.1",
+    "azure-mgmt-compute>=27.0.0",
+    "azure-mgmt-network>=22.0.0",
+    "azure-mgmt-storage>=20.0.0",
+    "azure-mgmt-keyvault>=10.0.0",
+    "azure-mgmt-monitor>=5.0.0",
+    "pyyaml>=6.0",
+    "colorama==0.4.6",
+    "pyfiglet==0.8.post1",
+    "tqdm==4.66.1",
+]
+
+[project.urls]
+Homepage = "https://github.com/sojay/azure-nuke"
+Documentation = "https://sojay.github.io/azure-nuke"
+Repository = "https://github.com/sojay/azure-nuke.git"
+Issues = "https://github.com/sojay/azure-nuke/issues"
+
+[project.scripts]
+aznuke = "aznuke:main"
+
+[tool.setuptools.packages.find]
+include = ["aznuke*", "src*"]
+
+[tool.setuptools.package-data]
+"*" = ["config/*.yaml"]
+
+[tool.black]
+line-length = 88
+target-version = ['py38', 'py39', 'py310', 'py311']
+
+[tool.isort]
+profile = "black"
+multi_line_output = 3 

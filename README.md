@@ -15,6 +15,33 @@ A powerful CLI tool for scanning and cleaning up Azure resources.
 
 ## Installation
 
+### Homebrew (Recommended for macOS/Linux)
+
+```bash
+# Add the tap
+brew tap sojay/tap
+
+# Install Azure Nuke
+brew install aznuke
+```
+
+### Binary Download
+
+Download pre-built binaries for your platform from [GitHub Releases](https://github.com/sojay/azure-nuke/releases).
+
+**Supported Platforms:**
+- Linux (AMD64, ARM64)
+- macOS (AMD64, ARM64) 
+- Windows (AMD64)
+
+```bash
+# Linux/macOS - make executable and move to PATH
+chmod +x aznuke-*
+sudo mv aznuke-* /usr/local/bin/aznuke
+```
+
+### Python Package
+
 ```bash
 # Install from PyPI
 pip install aznuke
