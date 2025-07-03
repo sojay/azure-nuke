@@ -20,12 +20,17 @@ def show_startup_animation():
     """Display the startup animation with Azure Nuke logo."""
     clear_screen()
     
-    # Create Azure Nuke ASCII art
-    fig = Figlet(font='slant')
-    azure_nuke_text = fig.renderText('Azure Nuke')
+    # Create Azure Nuke ASCII art with fallback
+    try:
+        fig = Figlet(font='slant')
+        azure_nuke_text = fig.renderText('Azure Nuke')
+        print(Fore.BLUE + azure_nuke_text)
+    except (ImportError, ModuleNotFoundError) as e:
+        # Fallback if pyfiglet fonts aren't available
+        print(Fore.BLUE + "=" * 50)
+        print(Fore.BLUE + "        AZURE NUKE")
+        print(Fore.BLUE + "=" * 50)
     
-    # Print the ASCII art in blue
-    print(Fore.BLUE + azure_nuke_text)
     print(Fore.YELLOW + "[INITIALIZING]" + Style.RESET_ALL + " Azure resource removal tool\n")
     
     # Loading animation
@@ -107,16 +112,29 @@ def show_completion_animation(success, resources_deleted, resources_failed):
         resources_failed (int): Number of resources that failed to process
     """
     print("\n")
-    if success:
-        fig = Figlet(font='slant')
-        complete_text = fig.renderText('Complete!')
-        print(Fore.GREEN + complete_text)
-        print(f"{Fore.GREEN}[SUCCESS]{Style.RESET_ALL} Operation completed successfully!")
-    else:
-        fig = Figlet(font='slant')
-        complete_text = fig.renderText('Completed')
-        print(Fore.YELLOW + complete_text)
-        print(f"{Fore.YELLOW}[COMPLETE WITH ERRORS]{Style.RESET_ALL} Some operations failed")
+    try:
+        if success:
+            fig = Figlet(font='slant')
+            complete_text = fig.renderText('Complete!')
+            print(Fore.GREEN + complete_text)
+            print(f"{Fore.GREEN}[SUCCESS]{Style.RESET_ALL} Operation completed successfully!")
+        else:
+            fig = Figlet(font='slant')
+            complete_text = fig.renderText('Completed')
+            print(Fore.YELLOW + complete_text)
+            print(f"{Fore.YELLOW}[COMPLETE WITH ERRORS]{Style.RESET_ALL} Some operations failed")
+    except (ImportError, ModuleNotFoundError):
+        # Fallback if pyfiglet fonts aren't available
+        if success:
+            print(Fore.GREEN + "=" * 50)
+            print(Fore.GREEN + "        COMPLETE!")
+            print(Fore.GREEN + "=" * 50)
+            print(f"{Fore.GREEN}[SUCCESS]{Style.RESET_ALL} Operation completed successfully!")
+        else:
+            print(Fore.YELLOW + "=" * 50)
+            print(Fore.YELLOW + "        COMPLETED")
+            print(Fore.YELLOW + "=" * 50)
+            print(f"{Fore.YELLOW}[COMPLETE WITH ERRORS]{Style.RESET_ALL} Some operations failed")
     
     print(f"{Fore.CYAN}         Resources processed: {resources_deleted}")
     if resources_failed > 0:
@@ -126,6 +144,4 @@ def show_completion_animation(success, resources_deleted, resources_failed):
     
     print(f"\n{Fore.YELLOW}[NOTE]{Style.RESET_ALL} Please check logs for details.")
 
-if __name__ == "__main__":
-    import asyncio
-    asyncio.run(main())
+# Animation module - no main execution needed
