@@ -55,7 +55,17 @@ jobs:
     
     - name: Build binary
       run: |
-        pyinstaller aznuke.spec --distpath dist --name aznuke-${{ matrix.platform }}-${{ matrix.arch }}
+        pyinstaller aznuke.spec --distpath dist
+    
+    - name: Rename binary (Windows)
+      if: matrix.platform == 'windows'
+      run: |
+        move dist\aznuke.exe dist\aznuke-${{ matrix.platform }}-${{ matrix.arch }}.exe
+    
+    - name: Rename binary (Unix)
+      if: matrix.platform != 'windows'
+      run: |
+        mv dist/aznuke dist/aznuke-${{ matrix.platform }}-${{ matrix.arch }}
     
     - name: Upload artifact
       uses: actions/upload-artifact@v4
