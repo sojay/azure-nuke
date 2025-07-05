@@ -7,6 +7,9 @@ azure-mgmt-network>=22.0.0
 azure-mgmt-storage>=20.0.0
 azure-mgmt-keyvault>=10.0.0
 azure-mgmt-monitor>=5.0.0
+azure-core>=1.26.0
+msal>=1.20.0
+msal-extensions>=1.0.0
 pyyaml>=6.0
 pytest>=7.0.0
 pytest-cov>=4.0.0
@@ -17,3 +20,5 @@ flake8>=4.0.1
 colorama==0.4.6
 pyfiglet==0.8.post1
 tqdm==4.66.1
+setuptools>=65.0.0
+wheel>=0.37.0

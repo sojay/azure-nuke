@@ -11,33 +11,21 @@ jobs:
   build:
     runs-on: ${{ matrix.os }}
     strategy:
+      fail-fast: false
       matrix:
         include:
-          # Linux AMD64
           - os: ubuntu-latest
             arch: x64
             platform: linux
-            target: x86_64-unknown-linux-gnu
-          # Linux ARM64
-          - os: ubuntu-latest
-            arch: arm64
-            platform: linux
-            target: aarch64-unknown-linux-gnu
-          # macOS AMD64
           - os: macos-latest
             arch: x64
             platform: darwin
-            target: x86_64-apple-darwin
-          # macOS ARM64 (M1/M2)
           - os: macos-14
             arch: arm64
             platform: darwin
-            target: aarch64-apple-darwin
-          # Windows AMD64
           - os: windows-latest
             arch: x64
             platform: windows
-            target: x86_64-pc-windows-msvc
 
     steps:
     - uses: actions/checkout@v4
@@ -46,6 +34,13 @@ jobs:
       uses: actions/setup-python@v5
       with:
         python-version: '3.11'
+        cache: 'pip'
+    
+    - name: Install system dependencies (Ubuntu)
+      if: matrix.platform == 'linux'
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y build-essential
     
     - name: Install dependencies
       run: |
@@ -53,9 +48,38 @@ jobs:
         pip install -r requirements.txt
         pip install pyinstaller
     
+    - name: Verify Python environment
+      run: |
+        python --version
+        pip list
+    
+    - name: Test imports before build
+      run: |
+        python -c "from aznuke.cli import cmd_scan, cmd_delete; print('CLI imports successful')"
+        python cli_entry.py --version
+    
     - name: Build binary
       run: |
-        pyinstaller aznuke.spec --distpath dist
+        pyinstaller aznuke.spec --clean --onefile --distpath dist --workpath build --specpath .
+      env:
+        PYTHONPATH: ${{ github.workspace }}
+    
+    - name: List build output
+      run: |
+        ls -la dist/
+        
+    - name: Test binary (Unix)
+      if: matrix.platform != 'windows'
+      run: |
+        chmod +x dist/aznuke
+        ./dist/aznuke --version
+        ./dist/aznuke scan --help
+    
+    - name: Test binary (Windows)
+      if: matrix.platform == 'windows'
+      run: |
+        .\dist\aznuke.exe --version
+        .\dist\aznuke.exe scan --help
     
     - name: Rename binary (Windows)
       if: matrix.platform == 'windows'
@@ -72,6 +96,17 @@ jobs:
       with:
         name: aznuke-${{ matrix.platform }}-${{ matrix.arch }}
         path: dist/aznuke-${{ matrix.platform }}-${{ matrix.arch }}*
+        retention-days: 30
+    
+    - name: Upload build logs on failure
+      if: failure()
+      uses: actions/upload-artifact@v4
+      with:
+        name: build-logs-${{ matrix.platform }}-${{ matrix.arch }}
+        path: |
+          build/
+          *.log
+        retention-days: 7
 
   release:
     needs: build
@@ -83,13 +118,19 @@ jobs:
     
     - name: Download all artifacts
       uses: actions/download-artifact@v4
+      with:
+        merge-multiple: true
+    
+    - name: List artifacts
+      run: find . -name "aznuke-*" -type f -ls
     
     - name: Create Release
       uses: softprops/action-gh-release@v2
       with:
         files: |
-          aznuke-*/*
+          aznuke-*
         draft: false
         prerelease: false
+        generate_release_notes: true
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} 
