@@ -10,6 +10,7 @@ on:
       - 'v*'
   pull_request:
     branches: [ main ]
+  workflow_dispatch:  # Allow manual testing
 
 jobs:
   build:
@@ -120,10 +121,11 @@ jobs:
           *.log
         retention-days: 7
 
+  # Only run PyPI and release jobs for actual releases (tags)
   pypi:
     needs: build
     runs-on: ubuntu-latest
-    if: startsWith(github.ref, 'refs/tags/')
+    if: startsWith(github.ref, 'refs/tags/v')
     
     steps:
     - uses: actions/checkout@v4
@@ -154,7 +156,7 @@ jobs:
   release:
     needs: build
     runs-on: ubuntu-latest
-    if: startsWith(github.ref, 'refs/tags/')
+    if: startsWith(github.ref, 'refs/tags/v')
     
     steps:
     - uses: actions/checkout@v4
