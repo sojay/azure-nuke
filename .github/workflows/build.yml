@@ -64,9 +64,15 @@ jobs:
       env:
         PYTHONPATH: ${{ github.workspace }}
     
-    - name: List build output
+    - name: List build output (Unix)
+      if: matrix.platform != 'windows'
       run: |
         ls -la dist/
+        
+    - name: List build output (Windows)
+      if: matrix.platform == 'windows'
+      run: |
+        dir dist\
         
     - name: Test binary (Unix)
       if: matrix.platform != 'windows'
