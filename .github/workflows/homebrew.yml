@@ -14,10 +14,10 @@ jobs:
           formula-name: aznuke
           formula-path: homebrew/aznuke.rb
           homebrew-tap: sojay/homebrew-tap
-          download-url: https://github.com/sojay/azure-nuke/archive/${{ github.event.release.tag_name }}.tar.gz
+          download-url: ${{ github.event.release.tarball_url }}
           commit-message: |
             {{formulaName}} {{version}}
             
             Created by https://github.com/mislav/bump-homebrew-formula-action
         env:
-          COMMITTER_TOKEN: ${{ secrets.HOMEBREW_TAP_TOKEN }} 
+          COMMITTER_TOKEN: ${{ secrets.GH_PAT }} 
