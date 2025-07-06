@@ -1,5 +1,9 @@
 name: Build Cross-Platform Binaries
 
+permissions:
+  id-token: write
+  contents: read
+
 on:
   push:
     tags:
