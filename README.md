@@ -2,6 +2,11 @@
 
 # Azure Nuke
 
+[![Build Cross-Platform Binaries](https://github.com/sojay/azure-nuke/workflows/Build%20Cross-Platform%20Binaries/badge.svg?event=push)](https://github.com/sojay/azure-nuke/actions?query=workflow%3A%22Build+Cross-Platform+Binaries%22)
+[![PyPI version](https://badge.fury.io/py/aznuke.svg)](https://badge.fury.io/py/aznuke)
+[![Python versions](https://img.shields.io/pypi/pyversions/aznuke.svg)](https://pypi.org/project/aznuke/)
+[![License](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
 A powerful CLI tool for scanning and cleaning up Azure resources.
 
 ## Features
