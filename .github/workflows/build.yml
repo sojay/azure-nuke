@@ -222,7 +222,9 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     if: startsWith(github.ref, 'refs/tags/v')
-    
+    permissions:
+      contents: write
+      
     steps:
     - uses: actions/checkout@v4
     
@@ -243,4 +245,4 @@ jobs:
         prerelease: false
         generate_release_notes: true
       env:
-        GITHUB_TOKEN: ${{ secrets.GH_PAT }} 
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} 

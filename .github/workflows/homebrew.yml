@@ -7,6 +7,10 @@ on:
 jobs:
   homebrew:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+      issues: write
     steps:
       - name: Update Homebrew formula
         uses: mislav/bump-homebrew-formula-action@v2
@@ -20,4 +24,4 @@ jobs:
             
             Created by https://github.com/mislav/bump-homebrew-formula-action
         env:
-          COMMITTER_TOKEN: ${{ secrets.GH_PAT }} 
+          COMMITTER_TOKEN: ${{ secrets.GITHUB_TOKEN }} 
