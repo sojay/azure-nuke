@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "aznuke"
-version = "0.1.9"
+dynamic = ["version"]
 description = "Azure resource scanner and cleanup tool"
 readme = "README.md"
 authors = [
@@ -55,6 +55,9 @@ include = ["aznuke*", "src*"]
 
 [tool.setuptools.package-data]
 "*" = ["config/*.yaml"]
+
+[tool.setuptools_scm]
+write_to = "aznuke/_version.py"
 
 [tool.black]
 line-length = 88

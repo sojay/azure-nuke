@@ -28,6 +28,13 @@ sys.path.insert(0, application_path)
 # Initialize colorama
 init(autoreset=True)
 
+# Get version dynamically
+try:
+    from aznuke import __version__
+    version_string = f'Azure Nuke {__version__}'
+except ImportError:
+    version_string = 'Azure Nuke (version unknown)'
+
 async def _main():
     parser = argparse.ArgumentParser(
         description="Azure Nuke - Azure resource scanner and cleanup tool",
@@ -35,7 +42,7 @@ async def _main():
     )
     
     # Add version argument
-    parser.add_argument('--version', action='version', version='Azure Nuke 0.1.9')
+    parser.add_argument('--version', action='version', version=version_string)
     
     subparsers = parser.add_subparsers(dest="command", help="Command to execute")
     
