@@ -35,7 +35,7 @@ async def _main():
     )
     
     # Add version argument
-    parser.add_argument('--version', action='version', version='Azure Nuke 0.1.8')
+    parser.add_argument('--version', action='version', version='Azure Nuke 0.1.9')
     
     subparsers = parser.add_subparsers(dest="command", help="Command to execute")
     
