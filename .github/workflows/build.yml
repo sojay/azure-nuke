@@ -60,7 +60,7 @@ jobs:
     
     - name: Build binary
       run: |
-        pyinstaller aznuke.spec --clean --onefile --distpath dist --workpath build --specpath .
+        pyinstaller aznuke.spec --clean --distpath dist --workpath build
       env:
         PYTHONPATH: ${{ github.workspace }}
     
