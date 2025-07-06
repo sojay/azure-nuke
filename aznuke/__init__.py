@@ -1,6 +1,6 @@
 """Azure Nuke - A powerful CLI tool for scanning and cleaning up Azure resources."""
 
-__version__ = "0.1.3"
+__version__ = "0.1.6"
 __author__ = "Samuel Okorie"
 __email__ = "thesamokorie@gmail.com"
 
