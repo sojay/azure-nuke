@@ -213,6 +213,22 @@ jobs:
     - name: Check package
       run: python -m twine check dist/*
     
+    - name: Check if version exists on PyPI
+      run: |
+        PKG_VERSION=$(python -c "import aznuke; print(aznuke.__version__)")
+        echo "Checking if version $PKG_VERSION already exists on PyPI..."
+        
+        # Check if version exists on PyPI using simple curl and grep
+        if curl -s "https://pypi.org/pypi/aznuke/json" | grep -q "\"$PKG_VERSION\""; then
+          echo "❌ Version $PKG_VERSION already exists on PyPI!"
+          echo "Please increment the version number and create a new tag."
+          echo "Current PyPI versions:"
+          curl -s "https://pypi.org/pypi/aznuke/json" | python -c "import sys, json; data=json.load(sys.stdin); print('  ' + '\n  '.join(sorted(data['releases'].keys())))"
+          exit 1
+        else
+          echo "✅ Version $PKG_VERSION is new and ready for upload"
+        fi
+    
     - name: Publish to PyPI
       uses: pypa/gh-action-pypi-publish@release/v1
       with:
