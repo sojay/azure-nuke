@@ -1,6 +1,4 @@
 class Aznuke < Formula
-  include Language::Python::Virtualenv
-
   desc "A powerful CLI tool for scanning and cleaning up Azure resources"
   homepage "https://github.com/sojay/azure-nuke"
   url "https://github.com/sojay/azure-nuke/archive/v0.1.7.tar.gz"
@@ -10,11 +8,36 @@ class Aznuke < Formula
   depends_on "python@3.11"
 
   def install
-    # Create version file since setuptools_scm can't determine version from tarball
-    (buildpath/"aznuke/_version.py").write "version = '0.1.7'\n"
+    # Create a virtual environment
+    venv_root = libexec/"venv"
+    system "python3.11", "-m", "venv", venv_root
     
-    # Use modern Homebrew virtualenv syntax
-    virtualenv_install_with_resources using: "python@3.11"
+    # Install dependencies
+    system venv_root/"bin/pip", "install", "azure-identity>=1.10.0"
+    system venv_root/"bin/pip", "install", "azure-mgmt-resource>=22.0.0"
+    system venv_root/"bin/pip", "install", "azure-mgmt-subscription>=3.1.1"
+    system venv_root/"bin/pip", "install", "azure-mgmt-compute>=27.0.0"
+    system venv_root/"bin/pip", "install", "azure-mgmt-network>=22.0.0"
+    system venv_root/"bin/pip", "install", "azure-mgmt-storage>=20.0.0"
+    system venv_root/"bin/pip", "install", "azure-mgmt-keyvault>=10.0.0"
+    system venv_root/"bin/pip", "install", "azure-mgmt-monitor>=5.0.0"
+    system venv_root/"bin/pip", "install", "pyyaml>=6.0"
+    system venv_root/"bin/pip", "install", "colorama==0.4.6"
+    system venv_root/"bin/pip", "install", "pyfiglet==0.8.post1"
+    system venv_root/"bin/pip", "install", "tqdm==4.66.1"
+    
+    # Copy source files
+    libexec.install Dir["*"]
+    
+    # Create version file
+    (libexec/"aznuke/_version.py").write "version = '0.1.7'\n"
+    
+    # Create wrapper script
+    (bin/"aznuke").write <<~EOS
+      #!/usr/bin/env bash
+      export PYTHONPATH="#{libexec}:$PYTHONPATH"
+      exec "#{venv_root}/bin/python" -c "from aznuke import main; main()" "$@"
+    EOS
   end
 
   test do
