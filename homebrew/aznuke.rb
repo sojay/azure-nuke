@@ -10,7 +10,11 @@ class Aznuke < Formula
   depends_on "python@3.11"
 
   def install
-    virtualenv_install_with_resources
+    # Create version file since setuptools_scm can't determine version from tarball
+    (buildpath/"aznuke/_version.py").write "version = '0.1.7'\n"
+    
+    # Use modern Homebrew virtualenv syntax
+    virtualenv_install_with_resources using: "python@3.11"
   end
 
   test do
