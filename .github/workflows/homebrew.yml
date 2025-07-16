@@ -1,8 +1,13 @@
-name: Update Homebrew Formula
+name: Update Homebrew Formula (DISABLED - Formula managed manually)
+
+# DISABLED: This workflow conflicts with manual formula management
+# To re-enable: uncomment the 'on:' section below and ensure:
+# 1. Create sojay/homebrew-tap repository
+# 2. Add GH_PAT secret with repo permissions  
+# 3. Move formula from homebrew/aznuke.rb to the tap repo
 
 on:
-  release:
-    types: [published]
+  workflow_dispatch: # Manual trigger only (effectively disabled)
 
 # NOTE: This workflow requires a GH_PAT secret with 'repo' permissions
 # to push to the homebrew tap repository. Set this in repository secrets.
@@ -10,6 +15,7 @@ on:
 jobs:
   homebrew:
     runs-on: ubuntu-latest
+    if: false  # Disabled
     steps:
       - name: Update Homebrew formula
         uses: mislav/bump-homebrew-formula-action@v2
