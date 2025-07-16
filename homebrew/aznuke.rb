@@ -9,13 +9,13 @@ class Aznuke < Formula
 
   def install
     venv = virtualenv_create(libexec, "python3.11")
-    venv.pip_install buildpath
     
-    # Create wrapper script
-    (bin/"aznuke").write <<~EOS
-      #!/usr/bin/env bash
-      exec "#{libexec}/bin/python" -m aznuke "$@"
-    EOS
+    # Install the package and its dependencies
+    venv.pip_install_and_link buildpath
+    
+    # Alternatively, install dependencies first then the package
+    # venv.pip_install "colorama==0.4.6", "pyfiglet==0.8.post1", "tqdm==4.66.1"
+    # venv.pip_install buildpath
   end
 
   test do
