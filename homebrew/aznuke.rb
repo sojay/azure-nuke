@@ -1,7 +1,7 @@
 class Aznuke < Formula
   desc "A powerful CLI tool for scanning and cleaning up Azure resources"
   homepage "https://github.com/sojay/azure-nuke"
-  url "https://github.com/sojay/azure-nuke/archive/v0.1.5.tar.gz"
+  url "https://github.com/sojay/azure-nuke/archive/v0.1.7.tar.gz"
   sha256 "PLACEHOLDER_SHA256"
   license "MIT"
 
