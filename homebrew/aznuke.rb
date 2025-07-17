@@ -8,11 +8,9 @@ class Aznuke < Formula
   depends_on "python@3.11"
 
   def install
-    # Create a virtual environment
     venv_root = libexec/"venv"
     system "python3.11", "-m", "venv", venv_root
     
-    # Install dependencies
     system venv_root/"bin/pip", "install", "azure-identity>=1.10.0"
     system venv_root/"bin/pip", "install", "azure-mgmt-resource>=22.0.0"
     system venv_root/"bin/pip", "install", "azure-mgmt-subscription>=3.1.1"
@@ -26,13 +24,9 @@ class Aznuke < Formula
     system venv_root/"bin/pip", "install", "pyfiglet==0.8.post1"
     system venv_root/"bin/pip", "install", "tqdm==4.66.1"
     
-    # Copy source files
     libexec.install Dir["*"]
-    
-    # Create version file
     (libexec/"aznuke/_version.py").write "version = '0.1.8'\n"
     
-    # Create wrapper script
     (bin/"aznuke").write <<~EOS
       #!/usr/bin/env bash
       export PYTHONPATH="#{libexec}:$PYTHONPATH"

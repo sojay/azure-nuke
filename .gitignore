@@ -78,6 +78,7 @@ site/
 
 # Homebrew
 homebrew/*.rb.bak
+homebrew/DEVELOPMENT.md
 
 # Build artifacts
 *.tar.gz
