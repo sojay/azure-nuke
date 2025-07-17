@@ -1,8 +1,8 @@
 class Aznuke < Formula
   desc "A powerful CLI tool for scanning and cleaning up Azure resources"
   homepage "https://github.com/sojay/azure-nuke"
-  url "https://github.com/sojay/azure-nuke/archive/v0.1.7.tar.gz"
-  sha256 "96171ad6a0218f74f8829a3bcdb36dfdd2a4fce45e1f0b0203a774876ec71d41"
+  url "https://github.com/sojay/azure-nuke/archive/v0.1.8.tar.gz"
+  sha256 "dbd8fd029c720df808beb9cb05ee5ae8cb1648406d2bae82715382ee0283b799"
   license "MIT"
 
   depends_on "python@3.11"
@@ -30,7 +30,7 @@ class Aznuke < Formula
     libexec.install Dir["*"]
     
     # Create version file
-    (libexec/"aznuke/_version.py").write "version = '0.1.7'\n"
+    (libexec/"aznuke/_version.py").write "version = '0.1.8'\n"
     
     # Create wrapper script
     (bin/"aznuke").write <<~EOS
