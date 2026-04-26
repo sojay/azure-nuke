@@ -3,7 +3,7 @@
 # Azure Nuke
 
 [![Build Cross-Platform Binaries](https://github.com/sojay/azure-nuke/actions/workflows/build.yml/badge.svg)](https://github.com/sojay/azure-nuke/actions/workflows/build.yml)
-[![PyPI version](https://badge.fury.io/py/aznuke.svg)](https://badge.fury.io/py/aznuke)
+[![PyPI version](https://img.shields.io/pypi/v/aznuke.svg)](https://pypi.org/project/aznuke/)
 [![Python versions](https://img.shields.io/pypi/pyversions/aznuke.svg)](https://pypi.org/project/aznuke/)
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
