@@ -7,7 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-04-26
+
 ### Added
+- Empty resource group cleanup after deletion — groups with no remaining resources are automatically deleted
 - Homebrew support for macOS and Linux
 - Cross-platform binary support (Darwin AMD64/ARM64, Linux AMD64/ARM64, Windows AMD64)
 - GitHub Pages documentation site
@@ -16,7 +19,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Automated release workflows
 - Build and release scripts
 
+### Fixed
+- `detach_disk` was a placeholder — now implements real disk detachment using `disk.managed_by` to locate attached VM and remove from `storage_profile.data_disks`
+- Removed stale `SubscriptionClient` and `DefaultAzureCredential` imports from `animations.py`
+- Fixed `safety.py` importing from `src.deletion` instead of `aznuke.src.deletion`
+- Fixed build status badge URL to use current GitHub Actions format
+- Swapped PyPI version badge from `badge.fury.io` to `shields.io` for faster cache refresh
+
 ### Changed
+- Upgraded `pyfiglet` from `0.8.post1` to `>=1.0.2` — removes `pkg_resources` dependency, fixes Python 3.12+ compatibility
+- Bumped `requires-python` from `>=3.8` to `>=3.9`
+- Updated Python version classifiers — added 3.12, removed 3.8
+- Updated `pyproject.toml` license field to SPDX string format, removed deprecated license classifier
 - Improved installation documentation
 - Updated project structure for better packaging
 
