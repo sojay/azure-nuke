@@ -4,7 +4,7 @@ from azure.mgmt.resource import ResourceManagementClient
 from azure.mgmt.network import NetworkManagementClient
 from azure.mgmt.compute import ComputeManagementClient
 from azure.mgmt.subscription import SubscriptionClient
-from src.animations import print_resource_action, create_progress_bar, async_spinner
+from aznuke.src.animations import print_resource_action, create_progress_bar, async_spinner
 
 def get_resource_client(credentials, subscription_id):
     """Create a resource management client for a specific subscription."""
@@ -328,21 +328,56 @@ async def detach_network_interface(compute_client, resource, dry_run=False):
         return True
 
 async def detach_disk(compute_client, resource, dry_run=False):
-    """Detach a disk from a virtual machine."""
+    """Detach a managed disk from its attached VM (if any) before deletion."""
     print_resource_action(resource, "deleting", details="Detaching disk", dry_run=dry_run)
-    
+
     if not dry_run:
         try:
-            # This is a placeholder for actual disk detachment logic
-            # You would need to implement the actual disk detachment here
-            await asyncio.sleep(1)
-            print_resource_action(resource, "deleted", details="Disk detached", dry_run=dry_run)
+            resource_group = resource.id.split('/resourceGroups/')[1].split('/')[0]
+            disk_name = resource.name if hasattr(resource, 'name') else resource.id.split('/')[-1]
+
+            disk = await asyncio.to_thread(
+                compute_client.disks.get, resource_group, disk_name
+            )
+
+            # managed_by is set to the VM resource ID when the disk is attached
+            if not disk.managed_by:
+                print_resource_action(resource, "deleted", details="Disk not attached to any VM", dry_run=dry_run)
+                return True
+
+            vm_id = disk.managed_by
+            vm_resource_group = vm_id.split('/resourceGroups/')[1].split('/')[0]
+            vm_name = vm_id.split('/virtualMachines/')[1].split('/')[0]
+
+            vm = await asyncio.to_thread(
+                compute_client.virtual_machines.get, vm_resource_group, vm_name
+            )
+
+            # Remove this disk from the VM's data disks list
+            original_count = len(vm.storage_profile.data_disks)
+            vm.storage_profile.data_disks = [
+                d for d in vm.storage_profile.data_disks
+                if d.managed_disk is None or d.managed_disk.id != resource.id
+            ]
+
+            if len(vm.storage_profile.data_disks) == original_count:
+                print_resource_action(resource, "deleted", details="Disk not found in VM data disks", dry_run=dry_run)
+                return True
+
+            poller = compute_client.virtual_machines.begin_create_or_update(
+                vm_resource_group, vm_name, vm
+            )
+
+            def poller_result():
+                return poller.result()
+
+            await async_spinner(f"Detaching disk {disk_name} from VM {vm_name}...", asyncio.to_thread(poller_result))
+            print_resource_action(resource, "deleted", details=f"Detached from VM {vm_name}", dry_run=dry_run)
             return True
         except Exception as e:
             print_resource_action(resource, "failed", details=str(e), dry_run=dry_run)
             return False
     else:
-        # Simulate delay in dry run mode
         await asyncio.sleep(0.5)
         print_resource_action(resource, "deleted", details="Disk detachment (simulation)", dry_run=dry_run)
         return True
@@ -420,11 +455,43 @@ def sort_by_dependencies(resources, dependency_graph):
 
     return sorted_resources
 
-async def delete_resources(credentials, resources_to_delete, dry_run=True):
+async def delete_empty_resource_groups(credentials, resource_groups, dry_run=False):
+    """Delete resource groups that are empty after resource deletion."""
+    deleted_rgs = []
+    for rg_name, subscription_id in resource_groups.items():
+        try:
+            resource_client = get_resource_client(credentials, subscription_id)
+            remaining = list(await asyncio.to_thread(
+                resource_client.resources.list_by_resource_group, rg_name
+            ))
+            if remaining:
+                continue
+
+            if dry_run:
+                print(f"  [DRY RUN] Would delete empty resource group: {rg_name}")
+                deleted_rgs.append(rg_name)
+                continue
+
+            poller = resource_client.resource_groups.begin_delete(rg_name)
+
+            def poller_result():
+                return poller.result()
+
+            await async_spinner(f"Deleting empty resource group {rg_name}...", asyncio.to_thread(poller_result))
+            deleted_rgs.append(rg_name)
+        except Exception as e:
+            print(f"  [WARN] Could not delete resource group {rg_name}: {e}")
+    return deleted_rgs
+
+
+async def delete_resources(credentials, resources_to_delete, dry_run=True, cleanup_empty_rgs=True):
     """Delete multiple resources in the correct order with proper async handling."""
     deleted_resources = []
     failed_resources = []
-    
+
+    # Track resource groups touched during deletion (rg_name -> subscription_id)
+    touched_rgs = {}
+
     # Group resources by subscription for efficiency
     resources_by_subscription = {}
     for resource in resources_to_delete:
@@ -432,16 +499,21 @@ async def delete_resources(credentials, resources_to_delete, dry_run=True):
         if subscription_id not in resources_by_subscription:
             resources_by_subscription[subscription_id] = []
         resources_by_subscription[subscription_id].append(resource)
-    
+
+        # Track resource groups
+        if hasattr(resource, 'id') and '/resourceGroups/' in resource.id:
+            rg_name = resource.id.split('/resourceGroups/')[1].split('/')[0]
+            touched_rgs[rg_name] = subscription_id
+
     # Create progress bar for overall deletion process
     total_resources = len(resources_to_delete)
     progress_bar = create_progress_bar(total_resources, "Deleting resources" if not dry_run else "Dry run - simulating deletion")
-    
+
     for subscription_id, resources in resources_by_subscription.items():
         # Build and sort the dependency graph
         dependency_graph = build_dependency_graph(resources)
         sorted_resources = sort_by_dependencies(resources, dependency_graph)
-        
+
         for resource in sorted_resources:
             try:
                 # Handle special resources that need pre-processing
@@ -453,10 +525,10 @@ async def delete_resources(credentials, resources_to_delete, dry_run=True):
                     "Microsoft.Compute/disks"
                 ]:
                     await process_special_resource(credentials, resource, dry_run)
-                
+
                 # Delete the resource
                 result = await delete_resource(credentials, resource, dry_run)
-                
+
                 if result is True or (isinstance(result, tuple) and result[0]):
                     deleted_resources.append(resource)
                 else:
@@ -468,8 +540,12 @@ async def delete_resources(credentials, resources_to_delete, dry_run=True):
             finally:
                 # Update progress bar
                 progress_bar.update(1)
-    
+
     progress_bar.close()
+
+    if cleanup_empty_rgs and touched_rgs:
+        await delete_empty_resource_groups(credentials, touched_rgs, dry_run)
+
     return deleted_resources, failed_resources
 
 # This should only be used for testing

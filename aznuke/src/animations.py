@@ -6,8 +6,6 @@ import time
 from colorama import init, Fore, Style
 from pyfiglet import Figlet
 from tqdm import tqdm
-from azure.identity import DefaultAzureCredential
-from azure.mgmt.resource import SubscriptionClient
 
 # Initialize colorama for cross-platform colored terminal text
 init(autoreset=True)

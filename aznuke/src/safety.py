@@ -1,5 +1,5 @@
 # safety.py
-from src.deletion import delete_resources
+from aznuke.src.deletion import delete_resources
 from aznuke.src.animations import show_warning_banner, show_summary_by_type
 
 def is_protected_subscription(subscription_id, protected_ids):
