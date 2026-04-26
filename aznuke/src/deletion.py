@@ -484,7 +484,7 @@ async def delete_empty_resource_groups(credentials, resource_groups, dry_run=Fal
     return deleted_rgs
 
 
-async def delete_resources(credentials, resources_to_delete, dry_run=True, cleanup_empty_rgs=True):
+async def delete_resources(credentials, resources_to_delete, dry_run=True, cleanup_empty_rgs=False):
     """Delete multiple resources in the correct order with proper async handling."""
     deleted_resources = []
     failed_resources = []

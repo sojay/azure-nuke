@@ -68,9 +68,9 @@ pytest tests/
 pytest --cov=src tests/
 
 # Run linting
-black src/ tests/
-pylint src/
-flake8 src/
+black aznuke/ tests/
+pylint aznuke/
+flake8 aznuke/
 ```
 
 ### 4. Commit Your Changes
@@ -104,7 +104,7 @@ We follow PEP 8 with some modifications:
 We use Black for code formatting:
 
 ```bash
-black src/ tests/
+black aznuke/ tests/
 ```
 
 ### Linting
@@ -112,8 +112,8 @@ black src/ tests/
 We use pylint and flake8:
 
 ```bash
-pylint src/
-flake8 src/
+pylint aznuke/
+flake8 aznuke/
 ```
 
 ### Example Code Style
@@ -175,7 +175,7 @@ Write unit tests for all new functionality:
 ```python
 import pytest
 from unittest.mock import Mock, patch
-from src.discovery import discover_all_resources
+from aznuke.src.discovery import discover_all_resources
 
 
 class TestResourceDiscovery:
@@ -194,7 +194,7 @@ class TestResourceDiscovery:
             Mock(subscription_id="sub2", display_name="Subscription 2")
         ]
     
-    @patch('src.discovery.ResourceManagementClient')
+    @patch('aznuke.src.discovery.ResourceManagementClient')
     async def test_discover_all_resources(
         self, 
         mock_client, 
@@ -220,7 +220,7 @@ For features that interact with Azure APIs:
 ```python
 import pytest
 from azure.identity import DefaultAzureCredential
-from src.auth import get_subscriptions
+from aznuke.src.auth import get_subscriptions
 
 
 @pytest.mark.integration
@@ -332,8 +332,8 @@ Update the documentation site in the `docs/` directory:
 This PR adds support for discovering and deleting Azure SQL Database resources.
 
 ## Changes
-- Added SQL Database resource handler in `src/discovery.py`
-- Added SQL Database deletion logic in `src/deletion.py`
+- Added SQL Database resource handler in `aznuke/src/discovery.py`
+- Added SQL Database deletion logic in `aznuke/src/deletion.py`
 - Added unit tests for new functionality
 - Updated documentation
 
@@ -423,7 +423,7 @@ For performance testing with large resource sets:
 
 ```python
 import time
-from src.discovery import discover_all_resources
+from aznuke.src.discovery import discover_all_resources
 
 start_time = time.time()
 resources = await discover_all_resources(credentials, subscriptions)

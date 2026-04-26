@@ -4,7 +4,6 @@
 import sys
 import os
 import asyncio
-import argparse
 from colorama import init, Fore, Style
 
 # Handle bundled executable path resolution
@@ -36,66 +35,22 @@ except ImportError:
     version_string = 'Azure Nuke (version unknown)'
 
 async def _main():
-    parser = argparse.ArgumentParser(
-        description="Azure Nuke - Azure resource scanner and cleanup tool",
-        formatter_class=argparse.RawDescriptionHelpFormatter
-    )
-    
-    # Add version argument
-    parser.add_argument('--version', action='version', version=version_string)
-    
-    subparsers = parser.add_subparsers(dest="command", help="Command to execute")
-    
-    # Scan command
-    scan_parser = subparsers.add_parser("scan", help="Scan for resources in Azure")
-    scan_parser.add_argument("--profile", help="Azure subscription profile name")
-    scan_parser.add_argument("--region", help="Azure region to scan")
-    scan_parser.add_argument("--checks", help="Comma-separated list of resource types to scan")
-    scan_parser.add_argument("--output", choices=["text", "json"], default="text", 
-                            help="Output format (text or json)")
-    scan_parser.add_argument("--severity", choices=["low", "medium", "high"], 
-                            help="Filter results by severity")
-    scan_parser.add_argument("--config", default=config_path, 
-                            help="Path to exclusions configuration file")
-    scan_parser.add_argument("-v", "--verbose", action="store_true", help="Enable verbose output")
-    
-    # Delete command
-    delete_parser = subparsers.add_parser("delete", help="Delete resources in Azure")
-    delete_parser.add_argument("--profile", help="Azure subscription profile name")
-    delete_parser.add_argument("--region", help="Azure region to target")
-    delete_parser.add_argument("--checks", help="Comma-separated list of resource types to delete")
-    delete_parser.add_argument("--dry-run", action="store_true", 
-                              help="Perform a dry run without actually deleting resources")
-    delete_parser.add_argument("--config", default=config_path, 
-                              help="Path to exclusions configuration file")
-    delete_parser.add_argument("--protected-subscriptions", nargs="+", 
-                              help="List of subscription IDs that should not be modified")
-    delete_parser.add_argument("--yes", "-y", action="store_true", 
-                              help="Skip confirmation prompt")
-    delete_parser.add_argument("-v", "--verbose", action="store_true", help="Enable verbose output")
-    
-    args = parser.parse_args()
-    
-    # Import the actual implementation
     try:
-        from aznuke.cli import cmd_scan, cmd_delete
-        
-        if args.command == "scan":
-            await cmd_scan(args)
-        elif args.command == "delete":
-            await cmd_delete(args)
-        else:
-            parser.print_help()
+        from aznuke.cli import create_parser, dispatch_command
+
+        parser = create_parser(default_config_path=config_path, version_string=version_string)
+        args = parser.parse_args()
+        await dispatch_command(args, parser)
     except ImportError as e:
         print(f"{Fore.RED}Error: Could not import Azure Nuke modules: {e}{Style.RESET_ALL}")
         print("Make sure Azure Nuke is properly installed.")
-        if args.verbose if hasattr(args, 'verbose') else False:
+        if "-v" in sys.argv or "--verbose" in sys.argv:
             import traceback
             traceback.print_exc()
         sys.exit(1)
     except Exception as e:
         print(f"{Fore.RED}Error: {e}{Style.RESET_ALL}")
-        if args.verbose if hasattr(args, 'verbose') else False:
+        if "-v" in sys.argv or "--verbose" in sys.argv:
             import traceback
             traceback.print_exc()
         sys.exit(1)

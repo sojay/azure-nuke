@@ -118,6 +118,7 @@ aznuke delete --dry-run
 ### Delete-specific Options
 
 - `--dry-run`: Preview resources that would be deleted without actually deleting
+- `--cleanup-empty-resource-groups`: Also delete resource groups left empty after selected resources are deleted
 - `--protected-subscriptions`: List of subscription IDs that should not be modified
 - `--yes, -y`: Skip confirmation prompt
 

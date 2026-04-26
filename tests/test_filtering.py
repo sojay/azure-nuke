@@ -85,6 +85,26 @@ def test_should_preserve_tags(mock_resource):
     assert should_preserve(mock_resource, exclusions)
 
 
+def test_should_preserve_region(mock_resource):
+    """Test resource preservation based on Azure region."""
+    mock_resource.location = "westus2"
+
+    exclusions = {
+        "regions": ["westus2"]
+    }
+
+    assert should_preserve(mock_resource, exclusions)
+
+
+def test_should_preserve_resource_group(mock_resource):
+    """Test resource preservation based on resource group."""
+    exclusions = {
+        "resource_groups": ["test-rg"]
+    }
+
+    assert should_preserve(mock_resource, exclusions)
+
+
 def test_should_not_preserve(mock_resource):
     """Test resource not preserved when no exclusion rules match"""
     # Configure exclusions that don't match the resource
@@ -96,7 +116,9 @@ def test_should_not_preserve(mock_resource):
         ],
         "tags": {
             "Environment": "Production"
-        }
+        },
+        "regions": ["eastus"],
+        "resource_groups": ["prod-rg"],
     }
     
     # Check if the resource should not be preserved

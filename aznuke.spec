@@ -4,15 +4,6 @@ import os
 
 block_cipher = None
 
-# Try to import pyfiglet, but don't fail if it's not available
-try:
-    import pyfiglet
-    pyfiglet_data = [(pyfiglet.__path__[0] + '/fonts', 'pyfiglet/fonts')]
-    pyfiglet_imports = ['pyfiglet', 'pyfiglet.fonts']
-except ImportError:
-    pyfiglet_data = []
-    pyfiglet_imports = []
-
 # Determine data files based on what exists
 data_files = []
 if os.path.exists('config/exclusions.yaml'):
@@ -24,7 +15,7 @@ a = Analysis(
     ['cli_entry.py'],
     pathex=[],
     binaries=[],
-    datas=data_files + pyfiglet_data,
+    datas=data_files,
     hiddenimports=[
         'azure.identity',
         'azure.mgmt.resource',
@@ -56,7 +47,7 @@ a = Analysis(
         'msal',
         'msal_extensions',
         'pkg_resources',
-    ] + pyfiglet_imports,
+    ],
     hookspath=[],
     hooksconfig={},
     runtime_hooks=[],

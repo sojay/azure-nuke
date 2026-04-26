@@ -2,8 +2,7 @@
 Tests for the safety module
 """
 import pytest
-import asyncio
-from unittest.mock import MagicMock, patch, AsyncMock
+from unittest.mock import MagicMock, patch
 
 from aznuke.src.safety import is_protected_subscription, require_confirmation
 
@@ -25,8 +24,7 @@ def test_is_protected_subscription():
 @pytest.mark.asyncio
 @patch('builtins.input')
 @patch('builtins.print')
-@patch('aznuke.src.safety.delete_resources')
-async def test_require_confirmation_yes(mock_delete_resources, mock_print, mock_input):
+async def test_require_confirmation_yes(mock_print, mock_input):
     """Test confirmation of deletion when the user confirms"""
     # Configure the mock resources
     mock_resource = MagicMock()
@@ -39,9 +37,6 @@ async def test_require_confirmation_yes(mock_delete_resources, mock_print, mock_
     # Configure user input to confirm deletion
     mock_input.return_value = "DELETE"
     
-    # Configure the delete_resources function
-    mock_delete_resources.return_value = (resources_to_delete, [])
-    
     # Create mock credentials
     mock_credentials = MagicMock()
     
@@ -49,15 +44,36 @@ async def test_require_confirmation_yes(mock_delete_resources, mock_print, mock_
     result = await require_confirmation(resources_to_delete, mock_credentials)
     
     # Verify the function behavior
+    assert result is True
     assert mock_input.call_count == 1
-    assert mock_delete_resources.call_count == 1
     assert mock_print.call_count > 0
+
 
 @pytest.mark.asyncio
 @patch('builtins.input')
 @patch('builtins.print')
-@patch('aznuke.src.safety.delete_resources')
-async def test_require_confirmation_no(mock_delete_resources, mock_print, mock_input):
+async def test_require_confirmation_warns_when_empty_rg_cleanup_enabled(mock_print, mock_input):
+    """Test confirmation discloses empty resource group cleanup."""
+    mock_resource = MagicMock()
+    mock_resource.type = "Microsoft.Storage/storageAccounts"
+    mock_resource.name = "teststorage"
+    mock_resource.subscription_name = "Development"
+    mock_input.return_value = "DELETE"
+
+    result = await require_confirmation(
+        [mock_resource],
+        MagicMock(),
+        cleanup_empty_resource_groups=True,
+    )
+
+    assert result is True
+    printed_text = "\n".join(str(call.args[0]) for call in mock_print.call_args_list if call.args)
+    assert "Empty resource group cleanup is enabled" in printed_text
+
+@pytest.mark.asyncio
+@patch('builtins.input')
+@patch('builtins.print')
+async def test_require_confirmation_no(mock_print, mock_input):
     """Test cancellation of deletion when the user doesn't confirm"""
     # Configure the mock resources
     mock_resource = MagicMock()
@@ -79,7 +95,6 @@ async def test_require_confirmation_no(mock_delete_resources, mock_print, mock_i
     # Verify the function behavior
     assert result is False
     assert mock_input.call_count == 1
-    assert mock_delete_resources.call_count == 0
     assert mock_print.call_count > 0
 
 @pytest.mark.asyncio

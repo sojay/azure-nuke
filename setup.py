@@ -29,7 +29,6 @@ setup(
         "azure-mgmt-monitor>=5.0.0",
         "pyyaml>=6.0",
         "colorama==0.4.6",
-        "pyfiglet==0.8.post1",
         "tqdm==4.66.1",
     ],
     entry_points={
@@ -43,13 +42,13 @@ setup(
         "Intended Audience :: System Administrators",
         "License :: OSI Approved :: MIT License",
         "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: 3.10",
         "Programming Language :: Python :: 3.11",
+        "Programming Language :: Python :: 3.12",
         "Topic :: System :: Systems Administration",
         "Topic :: Utilities",
     ],
     keywords="azure, cloud, cleanup, infrastructure, devops",
-    python_requires=">=3.8",
+    python_requires=">=3.9",
 ) 

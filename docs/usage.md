@@ -48,6 +48,7 @@ Additional options specific to the delete command:
 | Option | Description | Example |
 |--------|-------------|---------|
 | `--dry-run` | Preview without deleting | `--dry-run` |
+| `--cleanup-empty-resource-groups` | Also delete resource groups left empty after selected resources are deleted | `--cleanup-empty-resource-groups` |
 | `--protected-subscriptions` | List of protected subscription IDs | `--protected-subscriptions sub1 sub2` |
 | `--yes, -y` | Skip confirmation prompt | `--yes` |
 

@@ -2,11 +2,24 @@
 Tests for the CLI module
 """
 import pytest
-import asyncio
-from unittest.mock import MagicMock, patch, AsyncMock
+import inspect
+from unittest.mock import MagicMock, patch
 
 # Import the module to test
-from aznuke.cli import parse_resource_types, cmd_scan, cmd_delete
+from aznuke.cli import create_parser, parse_resource_types, cmd_scan, cmd_delete
+
+
+def spinner_results(*results):
+    """Return an async_spinner side effect that closes unused coroutine args."""
+    remaining = list(results)
+
+    def side_effect(*args, **kwargs):
+        coro = args[1] if len(args) > 1 else kwargs.get("coro")
+        if inspect.iscoroutine(coro):
+            coro.close()
+        return remaining.pop(0)
+
+    return side_effect
 
 
 def test_parse_resource_types():
@@ -25,6 +38,40 @@ def test_parse_resource_types_none():
     
     # Verify the result
     assert result is None
+
+
+def test_create_parser_scan_uses_supplied_default_config():
+    """Test scan parser wiring and configurable default config path."""
+    parser = create_parser(default_config_path="/tmp/exclusions.yaml", version_string="Azure Nuke test")
+
+    args = parser.parse_args(["scan", "--profile", "development", "--output", "json"])
+
+    assert args.command == "scan"
+    assert args.profile == "development"
+    assert args.output == "json"
+    assert args.config == "/tmp/exclusions.yaml"
+
+
+def test_create_parser_delete_wires_safety_options():
+    """Test delete parser wiring for dry-run and protected subscriptions."""
+    parser = create_parser(default_config_path="/tmp/exclusions.yaml", version_string="Azure Nuke test")
+
+    args = parser.parse_args([
+        "delete",
+        "--dry-run",
+        "--yes",
+        "--protected-subscriptions",
+        "sub-a",
+        "sub-b",
+        "--cleanup-empty-resource-groups",
+    ])
+
+    assert args.command == "delete"
+    assert args.dry_run is True
+    assert args.yes is True
+    assert args.config == "/tmp/exclusions.yaml"
+    assert args.protected_subscriptions == ["sub-a", "sub-b"]
+    assert args.cleanup_empty_resource_groups is True
 
 
 @pytest.mark.asyncio
@@ -55,15 +102,11 @@ async def test_cmd_scan(
     mock_subscription.display_name = "development"
     mock_subscriptions = [mock_subscription]
     
-    mock_spinner_instance = AsyncMock()
-    mock_spinner_instance.return_value = mock_subscriptions
-    mock_spinner.return_value = mock_subscriptions
-    
     mock_resource = MagicMock()
     mock_resources = [mock_resource]
     
     # Configure the second spinner call to return resources
-    mock_spinner.side_effect = [mock_subscriptions, mock_resources]
+    mock_spinner.side_effect = spinner_results(mock_subscriptions, mock_resources)
     
     mock_exclusions = {"resource_types": ["Microsoft.KeyVault/vaults"]}
     mock_load_exclusions.return_value = mock_exclusions
@@ -132,7 +175,7 @@ async def test_cmd_delete(
     mock_subscription.display_name = "development"
     mock_subscriptions = [mock_subscription]
     
-    mock_spinner.side_effect = [mock_subscriptions, [MagicMock()]]
+    mock_spinner.side_effect = spinner_results(mock_subscriptions, [MagicMock()])
     
     mock_exclusions = {"resource_types": ["Microsoft.KeyVault/vaults"]}
     mock_load_exclusions.return_value = mock_exclusions
@@ -158,6 +201,7 @@ async def test_cmd_delete(
     args.dry_run = False
     args.config = "config/exclusions.yaml"
     args.protected_subscriptions = None
+    args.cleanup_empty_resource_groups = False
     args.yes = False
     args.verbose = False
     
@@ -172,6 +216,16 @@ async def test_cmd_delete(
     mock_progress_bar.assert_called_once()
     mock_filter_async.assert_called_once()
     mock_show_summary.assert_called_once()
-    mock_confirmation.assert_called_once()
-    mock_delete.assert_called_once()
+    mock_confirmation.assert_called_once_with(
+        mock_resources_to_delete,
+        mock_creds_instance,
+        args.dry_run,
+        cleanup_empty_resource_groups=False,
+    )
+    mock_delete.assert_called_once_with(
+        mock_creds_instance,
+        mock_resources_to_delete,
+        args.dry_run,
+        cleanup_empty_rgs=False,
+    )
     mock_completion.assert_called_once_with(True, len(mock_deleted), len(mock_failed)) 

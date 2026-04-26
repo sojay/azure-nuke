@@ -2,10 +2,8 @@
 import warnings
 warnings.filterwarnings("ignore", message="pkg_resources is deprecated", category=UserWarning)
 
-import sys
 import argparse
 import asyncio
-import os
 from colorama import init, Fore, Style
 
 from aznuke.src.auth import get_subscriptions
@@ -16,11 +14,9 @@ from aznuke.src.safety import require_confirmation, is_protected_subscription
 from aznuke.src.animations import (
     show_startup_animation,
     async_spinner,
-    print_resource_action,
     create_progress_bar,
     show_summary_by_type,
-    show_completion_animation,
-    clear_screen
+    show_completion_animation
 )
 
 # Initialize colorama
@@ -49,6 +45,85 @@ def parse_resource_types(checks_str):
     if not checks_str:
         return None
     return [check.strip() for check in checks_str.split(',')]
+
+
+def create_parser(default_config_path=DEFAULT_CONFIG_PATH, version_string=None):
+    """Create the Azure Nuke argument parser."""
+    if version_string is None:
+        from aznuke import __version__
+        version_string = f'Azure Nuke {__version__}'
+
+    parser = argparse.ArgumentParser(
+        description="Azure Nuke - Azure resource scanner and cleanup tool",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog="""
+Examples:
+    # Run a full scan
+    aznuke scan
+
+    # Scan a specific subscription and region
+    aznuke scan --profile production --region westus2
+
+    # Scan only Storage and VM resources
+    aznuke scan --checks storage,virtualmachines
+
+    # Export results as JSON
+    aznuke scan --output json > azure_report.json
+
+    # Delete resources (after confirmation)
+    aznuke delete
+
+    # Delete specific resource types without confirmation
+    aznuke delete --checks storage,virtualmachines --yes
+
+    # Perform a dry run to see what would be deleted
+    aznuke delete --dry-run
+"""
+    )
+
+    parser.add_argument('--version', action='version', version=version_string)
+
+    subparsers = parser.add_subparsers(dest="command", help="Command to execute")
+
+    scan_parser = subparsers.add_parser("scan", help="Scan for resources in Azure")
+    scan_parser.add_argument("--profile", help="Azure subscription profile name")
+    scan_parser.add_argument("--region", help="Azure region to scan")
+    scan_parser.add_argument("--checks", help="Comma-separated list of resource types to scan")
+    scan_parser.add_argument("--output", choices=["text", "json"], default="text",
+                             help="Output format (text or json)")
+    scan_parser.add_argument("--severity", choices=["low", "medium", "high"],
+                             help="Filter results by severity")
+    scan_parser.add_argument("--config", default=default_config_path,
+                             help="Path to exclusions configuration file")
+    scan_parser.add_argument("-v", "--verbose", action="store_true", help="Enable verbose output")
+
+    delete_parser = subparsers.add_parser("delete", help="Delete resources in Azure")
+    delete_parser.add_argument("--profile", help="Azure subscription profile name")
+    delete_parser.add_argument("--region", help="Azure region to target")
+    delete_parser.add_argument("--checks", help="Comma-separated list of resource types to delete")
+    delete_parser.add_argument("--dry-run", action="store_true",
+                               help="Perform a dry run without actually deleting resources")
+    delete_parser.add_argument("--config", default=default_config_path,
+                               help="Path to exclusions configuration file")
+    delete_parser.add_argument("--protected-subscriptions", nargs="+",
+                               help="List of subscription IDs that should not be modified")
+    delete_parser.add_argument("--cleanup-empty-resource-groups", action="store_true",
+                               help="Delete resource groups that are empty after deleting selected resources")
+    delete_parser.add_argument("--yes", "-y", action="store_true",
+                               help="Skip confirmation prompt")
+    delete_parser.add_argument("-v", "--verbose", action="store_true", help="Enable verbose output")
+
+    return parser
+
+
+async def dispatch_command(args, parser):
+    """Dispatch parsed arguments to the requested command."""
+    if args.command == "scan":
+        await cmd_scan(args)
+    elif args.command == "delete":
+        await cmd_delete(args)
+    else:
+        parser.print_help()
 
 async def cmd_scan(args):
     """Scan for resources in Azure"""
@@ -233,8 +308,18 @@ async def cmd_delete(args):
         dry_run = args.dry_run
         
         # Get confirmation and delete resources
-        if args.yes or await require_confirmation(resources_to_delete, credentials, dry_run):
-            deleted, failed = await delete_resources(credentials, resources_to_delete, dry_run)
+        if args.yes or await require_confirmation(
+            resources_to_delete,
+            credentials,
+            dry_run,
+            cleanup_empty_resource_groups=args.cleanup_empty_resource_groups,
+        ):
+            deleted, failed = await delete_resources(
+                credentials,
+                resources_to_delete,
+                dry_run,
+                cleanup_empty_rgs=args.cleanup_empty_resource_groups,
+            )
             
             # Show completion animation
             success = len(failed) == 0
@@ -256,76 +341,9 @@ async def cmd_delete(args):
             print(traceback.format_exc())
 
 async def _main():
-    parser = argparse.ArgumentParser(
-        description="Azure Nuke - Azure resource scanner and cleanup tool",
-        formatter_class=argparse.RawDescriptionHelpFormatter,
-        epilog="""
-Examples:
-    # Run a full scan
-    aznuke scan
-
-    # Scan a specific subscription and region
-    aznuke scan --profile production --region westus2
-
-    # Scan only Storage and VM resources
-    aznuke scan --checks storage,virtualmachines
-
-    # Export results as JSON
-    aznuke scan --output json > azure_report.json
-
-    # Delete resources (after confirmation)
-    aznuke delete
-
-    # Delete specific resource types without confirmation
-    aznuke delete --checks storage,virtualmachines --yes
-
-    # Perform a dry run to see what would be deleted
-    aznuke delete --dry-run
-"""
-    )
-    
-    # Add version argument
-    from aznuke import __version__
-    parser.add_argument('--version', action='version', version=f'Azure Nuke {__version__}')
-    
-    subparsers = parser.add_subparsers(dest="command", help="Command to execute")
-    
-    # Scan command
-    scan_parser = subparsers.add_parser("scan", help="Scan for resources in Azure")
-    scan_parser.add_argument("--profile", help="Azure subscription profile name")
-    scan_parser.add_argument("--region", help="Azure region to scan")
-    scan_parser.add_argument("--checks", help="Comma-separated list of resource types to scan")
-    scan_parser.add_argument("--output", choices=["text", "json"], default="text", 
-                            help="Output format (text or json)")
-    scan_parser.add_argument("--severity", choices=["low", "medium", "high"], 
-                            help="Filter results by severity")
-    scan_parser.add_argument("--config", default=DEFAULT_CONFIG_PATH, 
-                            help="Path to exclusions configuration file")
-    scan_parser.add_argument("-v", "--verbose", action="store_true", help="Enable verbose output")
-    
-    # Delete command
-    delete_parser = subparsers.add_parser("delete", help="Delete resources in Azure")
-    delete_parser.add_argument("--profile", help="Azure subscription profile name")
-    delete_parser.add_argument("--region", help="Azure region to target")
-    delete_parser.add_argument("--checks", help="Comma-separated list of resource types to delete")
-    delete_parser.add_argument("--dry-run", action="store_true", 
-                              help="Perform a dry run without actually deleting resources")
-    delete_parser.add_argument("--config", default=DEFAULT_CONFIG_PATH, 
-                              help="Path to exclusions configuration file")
-    delete_parser.add_argument("--protected-subscriptions", nargs="+", 
-                              help="List of subscription IDs that should not be modified")
-    delete_parser.add_argument("--yes", "-y", action="store_true", 
-                              help="Skip confirmation prompt")
-    delete_parser.add_argument("-v", "--verbose", action="store_true", help="Enable verbose output")
-    
+    parser = create_parser()
     args = parser.parse_args()
-    
-    if args.command == "scan":
-        await cmd_scan(args)
-    elif args.command == "delete":
-        await cmd_delete(args)
-    else:
-        parser.print_help()
+    await dispatch_command(args, parser)
 
 def main():
     """Entry point for the application script"""

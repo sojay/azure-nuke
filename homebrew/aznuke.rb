@@ -23,7 +23,6 @@ class Aznuke < Formula
     system venv_root/"bin/pip", "install", "azure-mgmt-monitor>=5.0.0"
     system venv_root/"bin/pip", "install", "pyyaml>=6.0"
     system venv_root/"bin/pip", "install", "colorama==0.4.6"
-    system venv_root/"bin/pip", "install", "pyfiglet==0.8.post1"
     system venv_root/"bin/pip", "install", "tqdm==4.66.1"
     
     # Copy source files

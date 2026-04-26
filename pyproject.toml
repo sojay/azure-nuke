@@ -36,7 +36,6 @@ dependencies = [
     "azure-mgmt-monitor>=5.0.0",
     "pyyaml>=6.0",
     "colorama==0.4.6",
-    "pyfiglet>=1.0.2",
     "tqdm==4.66.1",
 ]
 

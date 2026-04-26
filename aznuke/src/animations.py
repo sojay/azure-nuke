@@ -1,10 +1,6 @@
-# src/animations.py
-import asyncio
-import sys
 import os
 import time
 from colorama import init, Fore, Style
-from pyfiglet import Figlet
 from tqdm import tqdm
 
 # Initialize colorama for cross-platform colored terminal text
@@ -165,7 +161,3 @@ def show_warning_banner():
     print(f"{Fore.RED}[CAUTION]{Style.RESET_ALL} You are about to delete Azure resources.")
     print(f"{Fore.RED}[CAUTION]{Style.RESET_ALL} This operation cannot be undone.")
     print("\n")
-
-if __name__ == "__main__":
-    import asyncio
-    asyncio.run(main())

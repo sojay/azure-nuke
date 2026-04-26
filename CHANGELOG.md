@@ -5,12 +5,10 @@ All notable changes to Azure Nuke will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
-
 ## [0.2.0] - 2026-04-26
 
 ### Added
-- Empty resource group cleanup after deletion — groups with no remaining resources are automatically deleted
+- Empty resource group cleanup after deletion - groups with no remaining resources are automatically deleted
 - Homebrew support for macOS and Linux
 - Cross-platform binary support (Darwin AMD64/ARM64, Linux AMD64/ARM64, Windows AMD64)
 - GitHub Pages documentation site
@@ -20,7 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Build and release scripts
 
 ### Fixed
-- `detach_disk` was a placeholder — now implements real disk detachment using `disk.managed_by` to locate attached VM and remove from `storage_profile.data_disks`
+- `detach_disk` was a placeholder. now implements real disk detachment using `disk.managed_by` to locate attached VM and remove from `storage_profile.data_disks`
 - Removed stale `SubscriptionClient` and `DefaultAzureCredential` imports from `animations.py`
 - Fixed `safety.py` importing from `src.deletion` instead of `aznuke.src.deletion`
 - Fixed build status badge URL to use current GitHub Actions format

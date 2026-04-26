@@ -4,7 +4,7 @@ This document provides detailed information about Azure Nuke's internal API and 
 
 ## Core Modules
 
-### Authentication (`src/auth.py`)
+### Authentication (`aznuke/src/auth.py`)
 
 Handles Azure authentication and subscription management.
 
@@ -23,13 +23,13 @@ Retrieves accessible Azure subscriptions.
 **Example:**
 ```python
 from azure.identity import DefaultAzureCredential
-from src.auth import get_subscriptions
+from aznuke.src.auth import get_subscriptions
 
 credentials = DefaultAzureCredential()
 subscriptions = get_subscriptions(credentials)
 ```
 
-### Discovery (`src/discovery.py`)
+### Discovery (`aznuke/src/discovery.py`)
 
 Handles resource discovery across Azure subscriptions.
 
@@ -46,18 +46,18 @@ Discovers resources across all provided subscriptions.
 **Returns:**
 - `List[AzureResource]`: List of discovered resources
 
-##### `discover_subscription_resources(credentials, subscription)`
+##### `discover_resources(resource_client, resource_types=None)`
 
-Discovers resources in a single subscription.
+Discovers resources for a resource client, optionally limited by resource type.
 
 **Parameters:**
-- `credentials` (DefaultAzureCredential): Azure credentials
-- `subscription` (Subscription): Subscription to scan
+- `resource_client` (ResourceManagementClient): Azure resource client
+- `resource_types` (Optional[List[str]]): Resource types to scan
 
 **Returns:**
-- `List[AzureResource]`: List of resources in the subscription
+- `List[AzureResource]`: List of resources from the client
 
-### Filtering (`src/filtering.py`)
+### Filtering (`aznuke/src/filtering.py`)
 
 Applies exclusion rules to filter resources.
 
@@ -85,13 +85,13 @@ Filters resources based on exclusion rules.
 **Returns:**
 - `Tuple[List[AzureResource], List[AzureResource]]`: Tuple of (resources_to_delete, resources_to_preserve)
 
-### Deletion (`src/deletion.py`)
+### Deletion (`aznuke/src/deletion.py`)
 
 Handles resource deletion operations.
 
 #### Functions
 
-##### `delete_resources(credentials, resources, dry_run=False)`
+##### `delete_resources(credentials, resources, dry_run=True, cleanup_empty_rgs=False)`
 
 Deletes or simulates deletion of resources.
 
@@ -99,17 +99,18 @@ Deletes or simulates deletion of resources.
 - `credentials` (DefaultAzureCredential): Azure credentials
 - `resources` (List[AzureResource]): Resources to delete
 - `dry_run` (bool): If True, only simulate deletion
+- `cleanup_empty_rgs` (bool): If True, delete resource groups left empty after selected resources are processed
 
 **Returns:**
 - `Tuple[List[AzureResource], List[Tuple[AzureResource, str]]]`: Tuple of (deleted_resources, failed_resources)
 
-### Safety (`src/safety.py`)
+### Safety (`aznuke/src/safety.py`)
 
 Provides safety checks and confirmation prompts.
 
 #### Functions
 
-##### `require_confirmation(resources, credentials, dry_run=False)`
+##### `require_confirmation(resources, credentials, dry_run=False, cleanup_empty_resource_groups=False)`
 
 Prompts user for confirmation before deletion.
 
@@ -117,6 +118,7 @@ Prompts user for confirmation before deletion.
 - `resources` (List[AzureResource]): Resources to be deleted
 - `credentials` (DefaultAzureCredential): Azure credentials
 - `dry_run` (bool): If True, indicates dry run mode
+- `cleanup_empty_resource_groups` (bool): If True, disclose that empty resource groups may also be deleted
 
 **Returns:**
 - `bool`: True if user confirms, False otherwise
@@ -203,6 +205,7 @@ Deletes Azure resources.
 - `--checks` (str): Comma-separated resource types
 - `--config` (str): Configuration file path
 - `--dry-run` (bool): Dry run mode
+- `--cleanup-empty-resource-groups` (bool): Delete resource groups left empty after deleting selected resources
 - `--protected-subscriptions` (List[str]): Protected subscription IDs
 - `--yes` (bool): Skip confirmation
 - `--verbose` (bool): Verbose output
@@ -277,22 +280,17 @@ resource_groups:
 
 ### Custom Resource Handlers
 
-You can extend Azure Nuke with custom resource handlers:
+You can extend Azure Nuke by adding focused discovery helpers around the Azure
+SDK clients:
 
 ```python
-from src.discovery import ResourceHandler
+from aznuke.src.discovery import discover_resources
 
-class CustomResourceHandler(ResourceHandler):
-    def can_handle(self, resource_type):
-        return resource_type == "Microsoft.Custom/resources"
-    
-    def discover(self, client, subscription_id):
-        # Custom discovery logic
-        pass
-    
-    def delete(self, client, resource):
-        # Custom deletion logic
-        pass
+def discover_custom_resources(resource_client):
+    return discover_resources(
+        resource_client,
+        resource_types=["Microsoft.Custom/resources"],
+    )
 ```
 
 ### Custom Filters
@@ -300,12 +298,12 @@ class CustomResourceHandler(ResourceHandler):
 Add custom filtering logic:
 
 ```python
-from src.filtering import Filter
+from aznuke.src.filtering import should_preserve
 
-class CustomFilter(Filter):
-    def should_exclude(self, resource, exclusions):
-        # Custom filtering logic
-        return False
+def should_preserve_custom_resource(resource, exclusions):
+    if getattr(resource, "type", "") == "Microsoft.Custom/resources":
+        return True
+    return should_preserve(resource, exclusions)
 ```
 
 ## Testing
@@ -342,7 +340,7 @@ Azure Nuke uses async operations for better performance:
 
 ```python
 import asyncio
-from src.discovery import discover_all_resources
+from aznuke.src.discovery import discover_all_resources
 
 async def main():
     resources = await discover_all_resources(credentials, subscriptions)

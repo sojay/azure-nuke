@@ -23,25 +23,19 @@ def test_clear_screen(mock_system):
     mock_system.assert_called_once()
 
 @patch('aznuke.src.animations.clear_screen')
-@patch('aznuke.src.animations.Figlet')
 @patch('builtins.print')
 @patch('time.sleep')
-def test_show_startup_animation(mock_sleep, mock_print, mock_figlet, mock_clear_screen):
+def test_show_startup_animation(mock_sleep, mock_print, mock_clear_screen):
     """Test the startup animation display"""
-    # Configure mock figlet
-    mock_figlet_instance = MagicMock()
-    mock_figlet.return_value = mock_figlet_instance
-    mock_figlet_instance.renderText.return_value = "Azure Nuke"
-    
     # Call the function
     show_startup_animation()
     
     # Verify the calls
     mock_clear_screen.assert_called_once()
-    mock_figlet.assert_called_once_with(font='slant')
-    mock_figlet_instance.renderText.assert_called_once_with('Azure Nuke')
     assert mock_sleep.call_count == 5
     assert mock_print.call_count > 0
+    printed_text = "\n".join(str(call.args[0]) for call in mock_print.call_args_list if call.args)
+    assert "Cloud Resource Cleanup Tool for Azure" in printed_text
 
 @pytest.mark.asyncio
 @patch('builtins.print')
@@ -155,35 +149,25 @@ def test_show_summary_by_type(mock_print):
     assert mock_print.call_count >= 3  # At least 3 print calls (type header, two resources)
 
 @patch('builtins.print')
-@patch('aznuke.src.animations.Figlet')
-def test_show_completion_animation_success(mock_figlet, mock_print):
+def test_show_completion_animation_success(mock_print):
     """Test showing the completion animation for successful operation"""
-    # Configure mock figlet
-    mock_figlet_instance = MagicMock()
-    mock_figlet.return_value = mock_figlet_instance
-    mock_figlet_instance.renderText.return_value = "Complete!"
-    
     # Call the function for successful operation
     show_completion_animation(True, 10, 0)
     
     # Verify the function behavior
-    mock_figlet.assert_called_once_with(font='slant')
-    mock_figlet_instance.renderText.assert_called_once_with('Complete!')
     assert mock_print.call_count >= 4
+    printed_text = "\n".join(str(call.args[0]) for call in mock_print.call_args_list if call.args)
+    assert "Operation completed successfully" in printed_text
+    assert "Resources processed: 10" in printed_text
 
 @patch('builtins.print')
-@patch('aznuke.src.animations.Figlet')
-def test_show_completion_animation_with_errors(mock_figlet, mock_print):
+def test_show_completion_animation_with_errors(mock_print):
     """Test showing the completion animation with errors"""
-    # Configure mock figlet
-    mock_figlet_instance = MagicMock()
-    mock_figlet.return_value = mock_figlet_instance
-    mock_figlet_instance.renderText.return_value = "Completed"
-    
     # Call the function with errors
     show_completion_animation(False, 8, 2)
     
     # Verify the function behavior
-    mock_figlet.assert_called_once_with(font='slant')
-    mock_figlet_instance.renderText.assert_called_once_with('Completed')
     assert mock_print.call_count >= 4 
+    printed_text = "\n".join(str(call.args[0]) for call in mock_print.call_args_list if call.args)
+    assert "Some operations failed" in printed_text
+    assert "Resources failed: 2" in printed_text

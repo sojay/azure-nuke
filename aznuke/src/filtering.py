@@ -2,7 +2,6 @@
 import yaml
 import re
 import os
-import sys
 
 def find_config_file(config_path):
     """
@@ -55,6 +54,30 @@ def load_exclusions(config_file):
         print(f"Warning: Failed to load exclusions file: {e}")
         return {}
 
+
+def _string_attr(resource, attr_name):
+    """Return a string resource attribute, ignoring mock/dynamic attributes."""
+    value = getattr(resource, attr_name, None)
+    return value if isinstance(value, str) else None
+
+
+def _resource_group(resource):
+    """Return a resource group from a resource attribute or resource ID."""
+    resource_group = _string_attr(resource, 'resource_group')
+    if resource_group:
+        return resource_group
+
+    resource_id = _string_attr(resource, 'id')
+    if resource_id and '/resourceGroups/' in resource_id:
+        return resource_id.split('/resourceGroups/')[1].split('/')[0]
+
+    return None
+
+
+def _resource_region(resource):
+    """Return the resource location/region when present."""
+    return _string_attr(resource, 'location') or _string_attr(resource, 'region')
+
 def should_preserve(resource, exclusions):
     """Determine if a resource should be preserved based on exclusion rules."""
     # Check if resource type is excluded
@@ -68,6 +91,14 @@ def should_preserve(resource, exclusions):
     
     # Check for specific resource IDs
     if resource.id in exclusions.get('resource_ids', []):
+        return True
+
+    # Check for resource groups
+    if _resource_group(resource) in exclusions.get('resource_groups', []):
+        return True
+
+    # Check for regions
+    if _resource_region(resource) in exclusions.get('regions', []):
         return True
     
     # Check for resource tags
